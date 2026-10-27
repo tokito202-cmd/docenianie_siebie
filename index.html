@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Quiz Być Inaczej: sprawdź, jak bardzo doceniasz siebie w sześciu obszarach.">
+<title>Jak bardzo się doceniam?</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+/* Layout: jedno pytanie na ekran, karta na środku; wynik jako radar 6 obszarów + paski z opisem */
+:root{
+  --bg:#EDEFE6; --paper:#F8F9F3; --ink:#22271D; --muted:#5D6455; --line:#D3D7C7;
+  --olive:#56653A; --olive-soft:#DDE3CC; --gold:#A97B22; --gold-soft:#F1E3C2;
+  --plum:#7A3E5E; --plum-soft:#EEDDE5;
+  --display:"Instrument Serif", Georgia, serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161913; --paper:#1F231B; --ink:#E7EADD; --muted:#A3AA96; --line:#363C2E;
+  --olive:#A9B979; --olive-soft:#2D3523; --gold:#DDB35A; --gold-soft:#3A3020;
+  --plum:#D49BB8; --plum-soft:#3B2733; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#161913; --paper:#1F231B; --ink:#E7EADD; --muted:#A3AA96; --line:#363C2E;
+  --olive:#A9B979; --olive-soft:#2D3523; --gold:#DDB35A; --gold-soft:#3A3020;
+  --plum:#D49BB8; --plum-soft:#3B2733; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.12;text-wrap:balance}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.top h1{font-size:30px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--gold)}
+.progress{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--olive);width:0;transition:width .35s}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:28px 24px;display:flex;flex-direction:column;gap:24px}
+.qtext{font-family:var(--display);font-size:clamp(26px,5.4vw,34px);line-height:1.2;min-height:3.6em}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;padding:13px 16px;cursor:pointer;transition:background .15s,border-color .15s}
+.opt:hover{border-color:var(--olive);background:var(--olive-soft)}
+.opt:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.opt .k{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-weight:600;font-size:14px;color:var(--muted)}
+.opt.sel{background:var(--olive);border-color:var(--olive);color:var(--paper)}
+.opt.sel .k{border-color:var(--paper);color:var(--paper)}
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px}
+button.link{font:inherit;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 0}
+button.link:disabled{opacity:.35;cursor:default}
+button.main{font:inherit;font-weight:600;cursor:pointer;border-radius:8px;padding:12px 20px;border:1px solid var(--olive);background:var(--olive);color:var(--paper)}
+button.ghost{font:inherit;font-weight:600;cursor:pointer;border-radius:8px;padding:12px 20px;border:1px solid var(--olive);background:transparent;color:var(--olive)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.hint{font-size:13px;color:var(--muted)}
+/* result */
+.score{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.big{font-family:var(--display);font-size:76px;line-height:1;color:var(--olive);font-variant-numeric:tabular-nums}
+.big small{font-size:30px}
+.score>div:last-child{flex:1;min-width:220px;display:flex;flex-direction:column;gap:6px}
+.score p{margin:0;color:var(--muted)}
+.radar{display:flex;justify-content:center}
+.radar svg{width:100%;max-width:420px;height:auto}
+.dims{display:flex;flex-direction:column;gap:18px}
+.dim{display:grid;grid-template-columns:1fr auto;gap:6px 12px}
+.dim .name{font-weight:600}
+.pill{font-size:12px;font-weight:600;padding:2px 10px;border-radius:99px;align-self:center;font-variant-numeric:tabular-nums}
+.pill.low{background:var(--plum-soft);color:var(--plum)}
+.pill.mid{background:var(--gold-soft);color:var(--gold)}
+.pill.high{background:var(--olive-soft);color:var(--olive)}
+.track{grid-column:1/-1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:4px;transition:width .6s}
+.dim p{grid-column:1/-1;margin:0;font-size:14px;color:var(--muted)}
+.focus{background:var(--gold-soft);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.focus b{color:var(--gold)}
+.focus p{margin:0}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+#toast{font-size:14px;color:var(--olive);font-weight:600}
+footer{text-align:center;font-size:13px;color:var(--muted)}
+.fade{animation:f .3s ease}
+@keyframes f{from{opacity:.2;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Jak bardzo się doceniam?</h1><span class="eyebrow">Być Inaczej</span></div>
+
+  <div id="quizView" style="display:flex;flex-direction:column;gap:16px">
+    <div class="progress"><span id="pcount">1 / 18</span><div class="bar"><i id="pbar"></i></div></div>
+    <div class="card fade" id="card">
+      <div class="qtext" id="qtext"></div>
+      <div class="opts" id="opts" role="radiogroup" aria-labelledby="qtext"></div>
+      <div class="nav"><button class="link" id="back">← Wstecz</button></div>
+    </div>
+  </div>
+
+  <div id="resView" hidden></div>
+
+  <footer>@byc.inaczej</footer>
+</div>
+
+<script>
+const DIMS={
+  A:{name:"Wewnętrzny dialog",
+    low:"Twój wewnętrzny krytyk jest głośny i często ma ostatnie słowo. Po błędzie łatwo wpadasz w surowe oceny, które odbierają energię zamiast pomagać. Ten głos zwykle kiedyś miał Cię chronić, ale dziś bardziej rani niż wspiera.",
+    mid:"Bywasz dla siebie życzliwa/y, zwłaszcza gdy wszystko idzie dobrze. W trudnych chwilach wraca jednak surowy ton i stare zdania o sobie. Uczysz się już zauważać ten moment, a to pierwszy krok do zmiany.",
+    high:"Rozmawiasz ze sobą z szacunkiem i wyrozumiałością. Błędy traktujesz jak informację, a nie wyrok. Ta postawa daje Ci odwagę, by próbować nowych rzeczy.",
+    tip:"Gdy usłyszysz w głowie krytykę, zapytaj: „Czy powiedział(a)bym to przyjaciółce?”. Potem przeformułuj zdanie tak, jak zrobił(a)byś to dla niej."},
+  B:{name:"Przyjmowanie uznania",
+    low:"Dobre słowa od innych trudno do Ciebie docierają. Komplement wywołuje raczej zakłopotanie niż radość, więc szybko go odbijasz lub pomniejszasz. W ten sposób zamykasz drzwi przed czymś, co mogłoby Cię wzmacniać.",
+    mid:"Przyjmujesz uznanie, choć czasem odruchowo je pomniejszasz albo tłumaczysz („to nic takiego”). Część pochwał do Ciebie dociera, inne zbywasz, zanim zdążysz je poczuć.",
+    high:"Potrafisz przyjąć komplement i uwierzyć w niego. Dobre słowa od innych traktujesz jak informację zwrotną o sobie, a nie jak grzeczność. To buduje w Tobie stabilne poczucie własnej wartości.",
+    tip:"Przez tydzień na każdy komplement odpowiadaj tylko „dziękuję”, bez żadnego „ale”. Wieczorem zapisz jedno dobre słowo, które dziś usłyszałaś/eś."},
+  C:{name:"Zauważanie sukcesów",
+    low:"Twoje sukcesy przemykają niezauważone. Gdy coś się uda, od razu patrzysz na to, co jeszcze zostało do zrobienia. Przez to możesz mieć poczucie, że ciągle za mało robisz, choć fakty mówią co innego.",
+    mid:"Widzisz większe osiągnięcia, ale małe, codzienne zwycięstwa łatwo Ci umykają. Radość z sukcesu bywa krótka, bo szybko pojawia się kolejny cel.",
+    high:"Zauważasz i świętujesz swoje osiągnięcia, także te małe. Wiesz, co potrafisz, i umiesz to nazwać. To daje Ci poczucie sprawczości i motywację na kolejne kroki.",
+    tip:"Prowadź listę „zrobione” zamiast tylko „do zrobienia”. Każdego wieczoru zapisz trzy rzeczy, które Ci się udały, nawet najmniejsze."},
+  D:{name:"Wartość bez warunków",
+    low:"Twoje poczucie wartości mocno zależy od wyników, produktywności i porównań z innymi. W dni, gdy robisz mniej, możesz czuć się gorsza/y. To męczące, bo wartość trzeba wtedy ciągle udowadniać.",
+    mid:"Czasem czujesz się w porządku po prostu tak, a czasem musisz to „wypracować”. Porównania z innymi i pracowitość wciąż wpływają na to, jak siebie oceniasz.",
+    high:"Czujesz, że masz wartość niezależnie od wyników. Twoje działania wynikają z chęci, a nie z potrzeby udowadniania czegokolwiek. Porównania z innymi nie mają nad Tobą dużej władzy.",
+    tip:"Zaplanuj jedną przerwę dziennie, na którą nie musisz „zasłużyć”. Gdy złapiesz się na porównaniu, przypomnij sobie: widzę cudzą scenę, a swoje kulisy."},
+  E:{name:"Potrzeby i granice",
+    low:"Twoje potrzeby często lądują na końcu kolejki. Trudno Ci odmówić, a gdy już to robisz, długo się tłumaczysz albo czujesz winę. Na dłuższą metę prowadzi to do zmęczenia i cichej złości.",
+    mid:"Umiesz zadbać o swoje granice, choć nie zawsze bez poczucia winy. W ważnych sprawach mówisz, czego potrzebujesz, ale w codziennych sytuacjach często odpuszczasz.",
+    high:"Mówisz o swoich potrzebach i stawiasz granice w zdrowy sposób. Traktujesz siebie jak równorzędną osobę w relacjach. Dzięki temu Twoje „tak” jest szczere.",
+    tip:"Zacznij od nazwania jednej potrzeby na głos, np. „Potrzebuję chwili dla siebie”. Ćwicz krótkie „nie” bez uzasadniania, najpierw w drobnych sprawach."},
+  F:{name:"Troska o siebie",
+    low:"Odkładasz siebie na później, na „kiedyś”, gdy wszystko będzie zrobione. Przyjemności i odpoczynek budzą poczucie winy. A przecież bez tankowania trudno dawać innym.",
+    mid:"Dbasz o siebie, gdy jest na to miejsce, ale w natłoku obowiązków to właśnie z siebie rezygnujesz najpierw. Troska o siebie jest dla Ciebie ważna, choć jeszcze nie stała.",
+    high:"Troska o siebie jest naturalną częścią Twojego dnia. Wiesz, co Cię regeneruje, i dajesz sobie na to czas. To dobra baza dla wszystkich innych obszarów.",
+    tip:"Wpisz do kalendarza 30 minut tylko dla siebie i traktuj je jak ważne spotkanie. Zrób listę 10 małych przyjemności, po które możesz sięgnąć od ręki."}
+};
+const Q=[
+  ["A","Gdy popełniam błąd, mówię do siebie z życzliwością.",0],
+  ["B","Gdy ktoś mnie chwali, po prostu mówię „dziękuję”.",0],
+  ["C","Zauważam swoje małe, codzienne osiągnięcia.",0],
+  ["D","Moja wartość nie zależy od tego, ile dziś zrobię.",0],
+  ["E","Mówię otwarcie o tym, czego potrzebuję.",0],
+  ["F","Robię dla siebie przyjemne rzeczy bez poczucia winy.",0],
+  ["A","Częściej się krytykuję, niż chwalę.",1],
+  ["B","Pomniejszam swoje zasługi („to nic takiego”, „każdy by tak zrobił”).",1],
+  ["C","Gdy coś mi się uda, od razu myślę o kolejnym zadaniu, bez chwili radości.",1],
+  ["D","Porównuję się z innymi i zwykle wypadam w tym porównaniu gorzej.",1],
+  ["E","Potrzeby innych stawiam zawsze przed swoimi.",1],
+  ["F","Odkładam swoje sprawy i przyjemności na „kiedyś”.",1],
+  ["A","Potrafię wybaczyć sobie potknięcia.",0],
+  ["B","Wierzę ludziom, którzy mówią mi coś dobrego o mnie.",0],
+  ["C","Bez trudu wymienię co najmniej pięć swoich mocnych stron.",0],
+  ["D","Czuję, że muszę zasłużyć na odpoczynek.",1],
+  ["E","Potrafię odmówić bez długiego tłumaczenia się.",0],
+  ["F","Dbam o swój odpoczynek i ciało tak, jak dbam o bliskich.",0]
+];
+const LBL=["Zupełnie nie","Raczej nie","Czasem","Raczej tak","Zdecydowanie tak"];
+const LV={low:"Obszar do troski",mid:"W drodze",high:"Mocna strona"};
+const COL={low:"var(--plum)",mid:"var(--gold)",high:"var(--olive)"};
+const lvl=p=>p<45?"low":p<70?"mid":"high";
+const $=id=>document.getElementById(id);
+
+let st={i:0,a:{}};
+try{const s=JSON.parse(localStorage.getItem("doceniam-quiz")||"null");if(s&&s.a)st=s}catch(e){}
+const save=()=>{try{localStorage.setItem("doceniam-quiz",JSON.stringify(st))}catch(e){}};
+let lock=false;
+
+function render(){
+  const q=Q[st.i];
+  $("pcount").textContent=(st.i+1)+" / 18";
+  $("pbar").style.width=(Object.keys(st.a).length/18*100)+"%";
+  $("qtext").textContent=q[1];
+  $("opts").innerHTML=LBL.map((l,v)=>`<button class="opt${st.a[st.i]==v+1?" sel":""}" role="radio" aria-checked="${st.a[st.i]==v+1}" id="o${v+1}" data-v="${v+1}"><span class="k">${v+1}</span>${l}</button>`).join("");
+  $("back").disabled=st.i===0;
+  const c=$("card");c.classList.remove("fade");void c.offsetWidth;c.classList.add("fade");
+}
+function answer(v){
+  if(lock)return;lock=true;
+  st.a[st.i]=v;save();
+  [...$("opts").children].forEach(b=>{const on=+b.dataset.v===v;b.classList.toggle("sel",on);b.setAttribute("aria-checked",on)});
+  $("pbar").style.width=(Object.keys(st.a).length/18*100)+"%";
+  setTimeout(()=>{lock=false;
+    const next=Q.findIndex((_,k)=>k>st.i&&!st.a[k]);
+    if(Object.keys(st.a).length===18&&(next<0)){showRes()}
+    else{st.i=next<0?Q.findIndex((_,k)=>!st.a[k]):next;save();render()}
+  },260);
+}
+$("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(b)answer(+b.dataset.v)});
+$("back").onclick=()=>{if(st.i>0){st.i--;save();render()}};
+document.addEventListener("keydown",e=>{if($("quizView").hidden)return;if(/^[1-5]$/.test(e.key))answer(+e.key);if(e.key==="ArrowLeft"&&st.i>0){st.i--;render()}});
+
+function calc(){
+  const r={};Object.keys(DIMS).forEach(k=>r[k]=0);
+  Q.forEach((q,i)=>{const v=st.a[i];r[q[0]]+=q[2]?6-v:v});
+  const pct={};let tot=0;Object.keys(r).forEach(k=>{pct[k]=Math.round((r[k]-3)/12*100);tot+=r[k]});
+  return {pct,total:Math.round((tot-18)/72*100)};
+}
+function overall(t){
+  if(t<45)return ["Czas na więcej czułości wobec siebie","Wiele rzeczy, które robisz dobrze, przechodzi bez Twojej uwagi. To nie znaczy, że ich nie ma. Prawdopodobnie przez lata nauczyłaś/eś się patrzeć na siebie głównie przez pryzmat braków i oczekiwań. Dobra wiadomość: docenianie siebie to umiejętność, a nie cecha charakteru, więc można ją ćwiczyć. Zacznij łagodnie, od jednego obszaru i małych kroków. Każdy z nich się liczy."];
+  if(t<70)return ["Jesteś w drodze","Masz już fundamenty docenienia siebie. W wielu sytuacjach potrafisz być dla siebie dobra/y, ale w niektórych obszarach wciąż odzywa się stary schemat, zwłaszcza pod presją, w zmęczeniu lub w kontakcie z wymagającymi osobami. Zobacz, które obszary są najniżej, i od nich zacznij. Twoje mocne strony z wykresu są zasobem, na którym możesz się oprzeć."];
+  return ["Doceniasz siebie","Masz zdrową, życzliwą relację ze sobą. Widzisz swoje mocne strony, dbasz o swoje potrzeby i nie musisz ciągle udowadniać swojej wartości. To nie znaczy, że trudne dni się nie zdarzają, ale umiesz do siebie wrócić. Możesz tę relację pogłębiać i wzmacniać obszary, które jeszcze mogą urosnąć."];
+}
+function radar(pct){
+  const keys=Object.keys(DIMS),cx=210,cy=190,R=120,n=keys.length;
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+  let g="";
+  [25,50,75,100].forEach(s=>{g+=`<polygon points="${keys.map((_,i)=>pt(i,R*s/100).join(",")).join(" ")}" fill="none" stroke="var(--line)" stroke-width="1"/>`});
+  keys.forEach((_,i)=>{const [x,y]=pt(i,R);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)"/>`});
+  const poly=keys.map((k,i)=>pt(i,R*Math.max(pct[k],4)/100).join(",")).join(" ");
+  g+=`<polygon points="${poly}" fill="var(--olive)" fill-opacity=".22" stroke="var(--olive)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  keys.forEach((k,i)=>{const [x,y]=pt(i,R*Math.max(pct[k],4)/100);g+=`<circle cx="${x}" cy="${y}" r="4.5" fill="${COL[lvl(pct[k])]}"/>`;
+    const [lx,ly]=pt(i,R+30);const anchor=Math.abs(lx-cx)<5?"middle":lx>cx?"start":"end";
+    const words=DIMS[k].name.split(" ");const l1=words.slice(0,Math.ceil(words.length/2)).join(" "),l2=words.slice(Math.ceil(words.length/2)).join(" ");
+    const dy=ly<cy-5?-14:ly>cy+5?4:-6;
+    g+=`<text x="${lx}" y="${ly+dy}" text-anchor="${anchor}" font-size="13" font-family="Figtree,system-ui,sans-serif" fill="var(--ink)"><tspan x="${lx}">${l1}</tspan><tspan x="${lx}" dy="15">${l2}</tspan></text>`});
+  return `<svg viewBox="0 0 420 390" role="img" aria-label="Wykres radarowy sześciu obszarów">${g}</svg>`;
+}
+function showRes(){
+  st.done=true;save();
+  const {pct,total}=calc(),o=overall(total);
+  const sorted=Object.keys(pct).sort((a,b)=>pct[b]-pct[a]);
+  const low=Object.keys(pct).sort((a,b)=>pct[a]-pct[b]).slice(0,2);
+  $("quizView").hidden=true;
+  const r=$("resView");r.hidden=false;
+  r.innerHTML=`<div class="card fade">
+    <span class="eyebrow">Twój wynik</span>
+    <div class="score"><div class="big">${total}<small>%</small></div><div><h2 style="font-size:30px">${o[0]}</h2><p>${o[1]}</p></div></div>
+    <div class="radar">${radar(pct)}</div>
+    <div class="dims">${sorted.map(k=>{const p=pct[k],l=lvl(p);return `<div class="dim"><span class="name">${DIMS[k].name}</span><span class="pill ${l}">${LV[l]} · ${p}%</span><div class="track"><i style="width:${Math.max(p,3)}%;background:${COL[l]}"></i></div><p>${DIMS[k][l]}</p><p><b style="color:var(--ink)">Mały krok:</b> ${DIMS[k].tip}</p></div>`}).join("")}</div>
+    <div class="focus"><b>Od czego zacząć: ${low.map(k=>DIMS[k].name).join(" i ")}</b>
+      <p>To Twoje dwa obszary z najniższym wynikiem. Zmiana idzie najłatwiej tam, gdzie zaczynasz od małych, powtarzalnych kroków.</p>
+      ${low.map(k=>`<p>• <b style="color:var(--ink)">${DIMS[k].name}:</b> ${DIMS[k].tip}</p>`).join("")}
+      <p>Wybierz jeden krok i wykonuj go przez 7 dni. Po tygodniu zauważ, co się zmieniło w tym, jak o sobie myślisz.</p></div>
+    <p class="hint" style="margin:0">Wynik pokazuje, jak widzisz siebie dziś. To nie diagnoza ani stała ocena, tylko punkt wyjścia do pracy. Za kilka tygodni możesz wypełnić quiz ponownie i porównać wyniki.</p>
+    <div class="row"><button class="main" id="copy">Kopiuj wynik</button><button class="ghost" id="again">Wypełnij ponownie</button><span id="toast" role="status"></span></div>
+    <textarea id="out" hidden readonly style="width:100%;min-height:180px;font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px"></textarea>
+  </div>`;
+  $("again").onclick=()=>{st={i:0,a:{}};save();r.hidden=true;$("quizView").hidden=false;render();window.scrollTo(0,0)};
+  $("copy").onclick=()=>{
+    let t=`Jak bardzo się doceniam? Wynik: ${total}% (${o[0]})\n`+sorted.map(k=>`- ${DIMS[k].name}: ${pct[k]}% (${LV[lvl(pct[k])]})`).join("\n")+"\n@byc.inaczej";
+    const out=$("out"),fb=()=>{out.value=t;out.hidden=false;out.focus();out.select();$("toast").textContent="Zaznaczono tekst, skopiuj go skrótem klawiszowym."};
+    try{navigator.clipboard.writeText(t).then(()=>{$("toast").textContent="Skopiowano"},fb)}catch(e){fb()}
+  };
+  window.scrollTo(0,0);
+}
+
+if(st.done&&Object.keys(st.a).length===18)showRes();else{if(st.a[st.i]&&Object.keys(st.a).length<18){}render()}
+</script>
+</body>
+</html>
